@@ -1,0 +1,10 @@
+---
+overlays:
+  guru:
+    url: https://github.com/gentoo-mirror/guru.git
+    branch: master
+packages:
+  app-crypt/clevis: guru
+  dev-libs/luksmeta: guru
+  net-vpn/mullvadvpn-app: guru
+...
