@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
+# Credits for "actual_path" and "script_dir":
+# https://sqlpey.com/bash/how-do-i-get-the-directory-where-a-bash-script-is-located-from-within-the-script-itself/#solution-9-readlink--f-with-bash_source
+actual_path=$(readlink -f "${BASH_SOURCE[0]}")
+script_dir=$(dirname "$actual_path")
+
+packages_yml="$script_dir/packages.yml"
+
 # Credits for function "git-merge-subpath()":
 # https://stackoverflow.com/a/30386041
-
 function git-merge-subpath() {
     # Friendly parameter names; strip any trailing slashes from Gentoo package.
     local SOURCE_COMMIT="$1" GENTOO_PACKAGE="${2%/}" URL="$3"
@@ -42,19 +48,19 @@ ${FUNCNAME[0]}: $SOURCE_SHA1 $GENTOO_PACKAGE"
     fi
 }
 
-readarray -t overlays < <(yq -r '.overlays | select(length > 0) | keys[]' packages.yml)
+readarray -t overlays < <(yq -r '.overlays | select(length > 0) | keys[]' "$packages_yml")
 
 for overlay in "${overlays[@]}"; do
 
     # If the overlay is used by at least one of the packages...
     # shellcheck disable=SC2016
-    if yq --arg overlay "$overlay" --exit-status '.packages[] | select(. == $overlay)' packages.yml >/dev/null 2>&1; then
+    if yq --arg overlay "$overlay" --exit-status '.packages[] | select(. == $overlay)' "$packages_yml" >/dev/null 2>&1; then
 
         # shellcheck disable=SC2016
-        url=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].url' packages.yml)
+        url=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].url' "$packages_yml")
 
         # shellcheck disable=SC2016
-        branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' packages.yml)
+        branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' "$packages_yml")
 
         # Make sure that the URL defined in the YAML is always set
         if git remote get-url "$overlay" >/dev/null 2>&1; then
@@ -67,15 +73,15 @@ for overlay in "${overlays[@]}"; do
     fi
 done
 
-readarray -t packages < <(yq -r '.packages | select(length > 0) | keys[]' packages.yml)
+readarray -t packages < <(yq -r '.packages | select(length > 0) | keys[]' "$packages_yml")
 
 for package in "${packages[@]}"; do
     # shellcheck disable=SC2016
-    overlay=$(yq --arg package "$package" -r '.packages[$package]' packages.yml)
+    overlay=$(yq --arg package "$package" -r '.packages[$package]' "$packages_yml")
     # shellcheck disable=SC2016
-    url=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].url' packages.yml)
+    url=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].url' "$packages_yml")
     # shellcheck disable=SC2016
-    branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' packages.yml)
+    branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' "$packages_yml")
 
     git-merge-subpath "$overlay/$branch" "$package" "$url"
 done
