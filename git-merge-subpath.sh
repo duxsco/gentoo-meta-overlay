@@ -53,6 +53,8 @@ for package in "${packages[@]}"; do
 
     if ! git config "remote.$package.url" > /dev/null; then
         git remote add -f -t "$branch" --no-tags "$package" "$url"
+    else
+        git fetch "$package"
     fi
 
     git-merge-subpath "$package/$branch" "$package"
