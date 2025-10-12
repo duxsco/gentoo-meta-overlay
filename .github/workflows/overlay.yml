@@ -24,6 +24,9 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
+      - name: Create pull request branch
+        run: git switch -c "gh_action_run-${{ github.run_id }}"
+
       - name: Fetch ebuilds
         run: /bin/bash git-merge-subpath.sh
 
@@ -32,6 +35,6 @@ jobs:
           gh pr create \
             --assignee "${{ github.repository_owner }}" \
             --fill \
-            --head "gh_action_run_${{ github.run_id }}"
+            --head "gh_action_run-${{ github.run_id }}"
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
