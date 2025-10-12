@@ -21,8 +21,8 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
-        run: |
-          pwd
-          ls -la
-          env
-          # /bin/bash -c git-merge-subpath.sh
+        run: /bin/bash git-merge-subpath.sh
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: tree
