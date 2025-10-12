@@ -42,6 +42,31 @@ ${FUNCNAME[0]}: $SOURCE_SHA1 $GENTOO_PACKAGE"
     fi
 }
 
+readarray -t overlays < <(yq -r '.overlays | select(length > 0) | keys[]' packages.yml)
+
+for overlay in "${overlays[@]}"; do
+
+    # If the overlay is used by at least one of the packages...
+    # shellcheck disable=SC2016
+    if yq --arg overlay "$overlay" --exit-status '.packages[] | select(. == $overlay)' packages.yml >/dev/null 2>&1; then
+
+        # shellcheck disable=SC2016
+        url=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].url' packages.yml)
+
+        # shellcheck disable=SC2016
+        branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' packages.yml)
+
+        # Make sure that the URL defined in the YAML is always set
+        if git remote get-url "$overlay" >/dev/null 2>&1; then
+            git remote set-url "$overlay" "$url"
+        else
+            git remote add "$overlay" "$url"
+        fi
+
+        git fetch --no-tags "$overlay" "$branch"
+    fi
+done
+
 readarray -t packages < <(yq -r '.packages | select(length > 0) | keys[]' packages.yml)
 
 for package in "${packages[@]}"; do
@@ -52,11 +77,5 @@ for package in "${packages[@]}"; do
     # shellcheck disable=SC2016
     branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' packages.yml)
 
-    if ! git config "remote.$package.url" > /dev/null; then
-        git remote add -f -t "$branch" --no-tags "$package" "$url"
-    else
-        git fetch "$package"
-    fi
-
-    git-merge-subpath "$package/$branch" "$package" "$url"
+    git-merge-subpath "$overlay/$branch" "$package" "$url"
 done
