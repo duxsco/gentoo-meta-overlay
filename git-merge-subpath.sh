@@ -7,6 +7,12 @@ script_dir=$(dirname "$actual_path")
 
 packages_yml="$script_dir/packages.yml"
 
+if grep -q '(https://github.com/mikefarah/yq/)' < <(yq --version); then
+    packages_json=$(yq -o json "$packages_yml")
+else
+    packages_json=$(yq . "$packages_yml")
+fi
+
 # Credits for function "git-merge-subpath()":
 # https://stackoverflow.com/a/30386041
 function git-merge-subpath() {
@@ -48,19 +54,19 @@ ${FUNCNAME[0]}: $SOURCE_SHA1 $GENTOO_PACKAGE"
     fi
 }
 
-readarray -t overlays < <(yq -r '.overlays | select(length > 0) | keys[]' "$packages_yml")
+readarray -t overlays < <(jq -r '.overlays | select(length > 0) | keys[]' <<< "$packages_json")
 
 for overlay in "${overlays[@]}"; do
 
     # If the overlay is used by at least one of the packages...
     # shellcheck disable=SC2016
-    if yq --arg overlay "$overlay" --exit-status '.packages[] | select(. == $overlay)' "$packages_yml" >/dev/null 2>&1; then
+    if jq --arg overlay "$overlay" --exit-status '.packages[] | select(. == $overlay)' <<< "$packages_json" >/dev/null 2>&1; then
 
         # shellcheck disable=SC2016
-        url=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].url' "$packages_yml")
+        url=$(jq --arg overlay "$overlay" -r '.overlays[$overlay].url' <<< "$packages_json")
 
         # shellcheck disable=SC2016
-        branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' "$packages_yml")
+        branch=$(jq --arg overlay "$overlay" -r '.overlays[$overlay].branch' <<< "$packages_json")
 
         # Make sure that the URL defined in the YAML is always set
         if git remote get-url "$overlay" >/dev/null 2>&1; then
@@ -73,15 +79,15 @@ for overlay in "${overlays[@]}"; do
     fi
 done
 
-readarray -t packages < <(yq -r '.packages | select(length > 0) | keys[]' "$packages_yml")
+readarray -t packages < <(jq -r '.packages | select(length > 0) | keys[]' <<< "$packages_json")
 
 for package in "${packages[@]}"; do
     # shellcheck disable=SC2016
-    overlay=$(yq --arg package "$package" -r '.packages[$package]' "$packages_yml")
+    overlay=$(jq --arg package "$package" -r '.packages[$package]' <<< "$packages_json")
     # shellcheck disable=SC2016
-    url=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].url' "$packages_yml")
+    url=$(jq --arg overlay "$overlay" -r '.overlays[$overlay].url' <<< "$packages_json")
     # shellcheck disable=SC2016
-    branch=$(yq --arg overlay "$overlay" -r '.overlays[$overlay].branch' "$packages_yml")
+    branch=$(jq --arg overlay "$overlay" -r '.overlays[$overlay].branch' <<< "$packages_json")
 
     git-merge-subpath "$overlay/$branch" "$package" "$url"
 done
