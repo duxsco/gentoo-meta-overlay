@@ -5,7 +5,7 @@
 
 function git-merge-subpath() {
     # Friendly parameter names; strip any trailing slashes from Gentoo package.
-    local SOURCE_COMMIT="$1" GENTOO_PACKAGE="${2%/}"
+    local SOURCE_COMMIT="$1" GENTOO_PACKAGE="${2%/}" URL="$3"
 
     local SOURCE_SHA1
     SOURCE_SHA1=$(git rev-parse --verify "$SOURCE_COMMIT^{commit}") || return 1
@@ -34,7 +34,7 @@ function git-merge-subpath() {
             git commit --no-gpg-sign -m "\
 Merge Gentoo package \"$GENTOO_PACKAGE\" provided:
 - by commit: $SOURCE_SHA1
-- in Git repository: $url
+- in Git repository: $URL
 
 Leave next line untouched!
 ${FUNCNAME[0]}: $SOURCE_SHA1 $GENTOO_PACKAGE"
@@ -58,5 +58,5 @@ for package in "${packages[@]}"; do
         git fetch "$package"
     fi
 
-    git-merge-subpath "$package/$branch" "$package"
+    git-merge-subpath "$package/$branch" "$package" "$url"
 done
