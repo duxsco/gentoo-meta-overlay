@@ -17,12 +17,21 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
+      - name: Setup Git user
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Fetch ebuilds
         run: /bin/bash git-merge-subpath.sh
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: tree
+      - name: Create pull request
+        run: |
+          gh pr create \
+            --assignee "${{ github.repository_owner }}" \
+            --fill \
+            --head "gh_action_run_${{ github.run_id }}"
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
