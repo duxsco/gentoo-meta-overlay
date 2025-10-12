@@ -24,4 +24,5 @@ jobs:
         run: |
           pwd
           ls -la
+          env
           # /bin/bash -c git-merge-subpath.sh
