@@ -32,9 +32,9 @@ function git-merge-subpath() {
     if PATCH="$(git diff --color=never "$OLD_TREEISH" "$SOURCE_COMMIT:$GENTOO_PACKAGE")" && [[ -n "${PATCH}" ]]; then
         if git apply -3 --directory="$GENTOO_PACKAGE" <<<"${PATCH}"; then
             git commit --no-gpg-sign -m "\
-Merge Gentoo package \"$GENTOO_PACKAGE\" provided:
-- by commit: $SOURCE_SHA1
-- in Git repository: $URL
+Merge Gentoo package \"$GENTOO_PACKAGE\" as existent in:
+- Commit: $SOURCE_SHA1
+- Git repository: $URL
 
 Leave next line untouched!
 ${FUNCNAME[0]}: $SOURCE_SHA1 $GENTOO_PACKAGE"
