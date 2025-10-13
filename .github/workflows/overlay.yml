@@ -28,7 +28,7 @@ jobs:
         run: |
           gh pr create \
             --assignee "${{ github.repository_owner }}" \
-            --fill \
+            --fill-verbose \
             --head "gh_action_run-${{ github.run_id }}"
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
