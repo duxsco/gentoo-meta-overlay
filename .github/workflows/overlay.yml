@@ -28,7 +28,9 @@ jobs:
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Create pull request branch
-        run: git checkout -b "gh_action_run-${{ github.run_id }}" "origin/gh_action_run-${{ github.run_id }}"
+        run: |
+          git checkout -b "gh_action_run-${{ github.run_id }}"
+          git branch --set-upstream-to "origin/gh_action_run-${{ github.run_id }}"
 
       - name: Fetch ebuilds
         run: /bin/bash git-merge-subpath.sh
