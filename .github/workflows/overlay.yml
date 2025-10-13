@@ -34,7 +34,7 @@ jobs:
         run: /bin/bash git-merge-subpath.sh
 
       - name: Push PR branch
-        run: git push
+        run: git push --set-upstream origin "gh_action_run-${{ github.run_id }}"
 
       - name: Create PR
         run: |
