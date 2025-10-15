@@ -8,9 +8,9 @@ script_dir=$(dirname "$actual_path")
 packages_yml="$script_dir/packages.yml"
 
 if grep -q '(https://github.com/mikefarah/yq/)' < <(yq --version); then
-    packages_json=$(yq -o json "$packages_yml")
+    packages_json=$(yq -o json "$packages_yml" | jq --compact-output .)
 else
-    packages_json=$(yq . "$packages_yml")
+    packages_json=$(yq --compact-output . "$packages_yml")
 fi
 
 # Credits for function "git-merge-subpath()":
