@@ -92,3 +92,20 @@ for package in "${package_names_from_yml_file[@]}"; do
 
     git-merge-subpath "$overlay/$branch" "$package" "$url"
 done
+
+pushd "$(git rev-parse --show-toplevel)" || exit 1
+
+readarray -t package_names_from_own_git_tree < <(git ls-files --full-name '*.ebuild' | xargs dirname | sort -u )
+
+readarray -t obsolete_packages < <(
+    comm --check-order -13 \
+        <(printf '%s\n' "${package_names_from_yml_file[@]}") \
+        <(printf '%s\n' "${package_names_from_own_git_tree[@]}")
+)
+
+for package in "${obsolete_packages[@]}"; do
+    git rm -r -- "${package}" && \
+    git commit --no-gpg-sign -m "Delete Gentoo package \"${package}\""
+done
+
+popd || exit 1
