@@ -3,8 +3,24 @@ overlays:
   guru:
     url: https://github.com/gentoo-mirror/guru.git
     branch: master
+  haskell:
+    url: https://github.com/gentoo-haskell/gentoo-haskell.git
+    branch: master
+  kde:
+    url: https://anongit.gentoo.org/git/repo/sync/kde.git
+    branch: master
+  steam-overlay:
+    url: https://github.com/anyc/steam-overlay.git
+    branch: master
 packages:
   app-crypt/clevis: guru
   dev-libs/luksmeta: guru
+  dev-libs/nettle-compat: steam-overlay
+  games-action/monadius: haskell
+  kde-apps/kdf: kde
+  media-sound/amarok: kde
+  media-sound/hpodder: haskell
   net-vpn/mullvadvpn-app: guru
+  www-apps/gitit: haskell
+  x11-libs/extest: steam-overlay
 ...
