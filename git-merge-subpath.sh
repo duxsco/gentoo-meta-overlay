@@ -80,9 +80,9 @@ for overlay in "${overlays[@]}"; do
     fi
 done
 
-readarray -t packages < <(jq -r '.packages | select(length > 0) | keys[]' <<< "$packages_json")
+readarray -t package_names_from_yml_file < <(jq -r '.packages | select(length > 0) | keys[]' <<< "$packages_json" | sort -u)
 
-for package in "${packages[@]}"; do
+for package in "${package_names_from_yml_file[@]}"; do
     # shellcheck disable=SC2016
     overlay=$(jq --arg package "$package" -r '.packages[$package]' <<< "$packages_json")
     # shellcheck disable=SC2016
