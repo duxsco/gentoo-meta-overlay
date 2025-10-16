@@ -12,14 +12,25 @@ jobs:
 
       - name: Setup Git user
         run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          # See:
+          # https://github.com/marketplace/actions/checkout#push-a-commit-to-a-pr-using-the-built-in-token
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create a copy of git-merge-subpath.sh and packages.yml
+        run: |
+          SH_AND_YAML_COPY=$(mktemp -d)
+          echo "SH_AND_YAML_COPY=$SH_AND_YAML_COPY" >> "$GITHUB_ENV"
+          rsync --chmod=u=r,og= --verbose git-merge-subpath.sh packages.yml "${SH_AND_YAML_COPY}/"
 
       - name: Create PR branch
-        run: git checkout -b "gh_action_run-${{ github.run_id }}"
+        run: |
+          git fetch origin overlay
+          git checkout overlay
+          git checkout -B "gh_action_run-${{ github.run_id }}"
 
-      - name: Fetch ebuilds
-        run: /bin/bash git-merge-subpath.sh
+      - name: Fetch ebuilds and delete obsolete ones
+        run: /bin/bash "${SH_AND_YAML_COPY}/git-merge-subpath.sh"
 
       - name: Push PR branch
         run: git push --set-upstream origin "gh_action_run-${{ github.run_id }}"
@@ -29,6 +40,7 @@ jobs:
           gh pr create \
             --assignee "${{ github.repository_owner }}" \
             --fill-verbose \
+            --base overlay \
             --head "gh_action_run-${{ github.run_id }}"
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
