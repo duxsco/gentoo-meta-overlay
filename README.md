@@ -1,8 +1,6 @@
 # Gentoo Meta Overlay (WIP)
 
-⚠️ WIP ⚠️ WIP ⚠️ WIP ⚠️
-
-This project enables you to manage your own Gentoo Linux overlay by cherry-picking from 3rd party overlays and introducing their ebuilds to your overlay via pull request created by a GitHub Actions workflow. It basically does following using Git while removing all extraneous - not defined in [packages.yml](https://github.com/duxsco/gentoo-meta-overlay/blob/main/packages.yml) - local packages:
+This project enables you to manage your own Gentoo Linux overlay by cherry-picking from 3rd party overlays and introducing their packages to your overlay via pull request created by a GitHub Actions workflow. It basically does following using Git while removing all extraneous - not defined in [packages.yml](https://github.com/duxsco/gentoo-meta-overlay/blob/main/packages.yml) - local packages:
 
 ```shell
 ❯ rsync --delete --recursive --relative \
@@ -84,7 +82,7 @@ git push -u origin overlay
 git switch main
 ```
 
-3. Change `packages.yml` to your liking.
+3. Change `packages.yml` to your liking, commit and push the branch "main".
 4. Make sure that a checkmark is set at "Allow GitHub Actions to create and approve pull requests" (see [link #1](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests) and [link #2](https://github.blog/changelog/2022-05-03-github-actions-prevent-github-actions-from-creating-and-approving-pull-requests/)).
 5. Run GitHub Actions workflow from branch "main"
 6. I recommend the use of [pram](https://github.com/gentoo/pram) to merge the pull request:
