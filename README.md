@@ -61,6 +61,17 @@ echo -e 'masters = gentoo\nthin-manifests = true' > metadata/layout.conf
 #     └── repo_name
 #
 # 3 directories, 3 files
+#
+# ❯ head -n 999 */*
+# ==> metadata/layout.conf <==
+# masters = gentoo
+# thin-manifests = true
+#
+# ==> profiles/eapi <==
+# 8
+#
+# ==> profiles/repo_name <==
+# localrepo
 
 # Commit the branch
 git add metadata profiles
