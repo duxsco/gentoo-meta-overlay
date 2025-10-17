@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Save workflow settings
+        run: echo "one_pull_request_per_package=$(yq eval .github_actions_workflow_settings.one_pull_request_per_package packages.yml)" >> "$GITHUB_ENV"
+
       - name: Setup Git user
         run: |
           # See:
@@ -23,20 +26,38 @@ jobs:
           echo "SH_AND_YAML_COPY=$SH_AND_YAML_COPY" >> "$GITHUB_ENV"
           rsync --chmod=u=r,og= --verbose git-merge-subpath.sh packages.yml "${SH_AND_YAML_COPY}/"
 
-      - name: Create PR branch
+      - name: Create temporary branch to contain changes
         run: |
           git fetch origin overlay
           git checkout overlay
-          git checkout -B "gh_action_run-${{ github.run_id }}"
+          git checkout -B temp
 
-      - name: Fetch ebuilds and delete obsolete ones
+      - name: Fetch packages and delete obsolete ones
         run: /bin/bash "${SH_AND_YAML_COPY}/git-merge-subpath.sh"
 
-      - name: Push PR branch
-        run: git push --set-upstream origin "gh_action_run-${{ github.run_id }}"
-
-      - name: Create PR
+      - name: Create one pull request per package
+        if: env.one_pull_request_per_package == 'true'
         run: |
+          while read -r line; do
+            commit_hash=$(cut -d_ -f1 <<<"$line")
+            package=$(cut -d_ -f2 <<<"$line")
+            git checkout -B "gh_action_run-${{ github.run_id }}-${package}" overlay
+            git cherry-pick "$commit_hash"
+            git push --set-upstream origin "gh_action_run-${{ github.run_id }}-${package}"
+            gh pr create \
+              --assignee "${{ github.repository_owner }}" \
+              --fill-verbose \
+              --base overlay \
+              --head "gh_action_run-${{ github.run_id }}-${package}"
+          done < <(git --no-pager log --pretty=format:"%H %s" overlay..temp | tr -d '"' | awk '{print $1"_"$5}' | tac)
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create single pull request
+        if: env.one_pull_request_per_package == 'false'
+        run: |
+          git checkout -B "gh_action_run-${{ github.run_id }}" temp
+          git push --set-upstream origin "gh_action_run-${{ github.run_id }}"
           gh pr create \
             --assignee "${{ github.repository_owner }}" \
             --fill-verbose \

@@ -1,4 +1,6 @@
 ---
+github_actions_workflow_settings:
+  one_pull_request_per_package: true
 overlays:
   guru:
     url: https://github.com/gentoo-mirror/guru.git
