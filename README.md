@@ -1,4 +1,4 @@
-# Gentoo Meta Overlay (WIP)
+# Gentoo Meta Overlay
 
 This project enables you to manage your own Gentoo Linux overlay by cherry-picking from 3rd party overlays and introducing their packages to your overlay via pull request created by a GitHub Actions workflow. It basically does following using Git while removing all extraneous - not defined in [packages.yml](https://github.com/duxsco/gentoo-meta-overlay/blob/main/packages.yml) - local packages:
 
