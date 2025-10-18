@@ -86,7 +86,9 @@ git switch main
 
 3. Change `packages.yml` to your liking, commit and push the branch "main".
 4. Make sure that a checkmark is set at "Allow GitHub Actions to create and approve pull requests" (see [link #1](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests) and [link #2](https://github.blog/changelog/2022-05-03-github-actions-prevent-github-actions-from-creating-and-approving-pull-requests/)).
-5. Run GitHub Actions workflow from branch "main"
+5. Run GitHub Actions:
+   - Manually: Run workflow from branch "main" ([example](https://github.com/duxsco/gentoo-meta-overlay/actions/workflows/overlay.yml))
+   - Cron: Uncomment the "schedule" lines and adjust the UTC time ([example](https://github.com/duxsco/gentoo-meta-overlay/blob/main/.github/workflows/overlay.yml#L3-L4))
 6. I recommend the use of [pram](https://github.com/gentoo/pram) to merge the pull request:
 
 ```shell

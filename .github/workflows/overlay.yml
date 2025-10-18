@@ -1,5 +1,7 @@
 name: Update Gentoo overlay
 on:
+#  schedule:
+#    - cron: "42 1 * * *"
   workflow_dispatch:
 jobs:
   update_overlay:
