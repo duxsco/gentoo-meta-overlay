@@ -27,6 +27,8 @@ This project enables you to manage your own Gentoo Linux overlay by cherry-picki
 8 directories, 7 files
 ```
 
+## Fork & GitHub Actions
+
 Steps you need to undertake for setup:
 
 1. Create a fork containing only the branch "main" of [https://github.com/duxsco/gentoo-meta-overlay](https://github.com/duxsco/gentoo-meta-overlay)
@@ -91,4 +93,49 @@ git switch main
 git switch overlay
 pram --no-signoff --part-of --repository foo/gentoo 123
 pram --no-signoff --part-of --repository https://github.com/foo/gentoo/pull/123
+```
+
+## Overlay Installation On Hosts
+
+You need to execute following commands to setup the overlay on your hosts:
+
+```shell
+# Replace "duxsco" with the name
+# you have set above in file "profiles/repo_name"
+overlay_name="duxsco"
+
+# Set your own GitHub overlay repository
+git_repo="https://github.com/duxsco/gentoo-meta-overlay.git"
+
+# Create folder for overlay
+mkdir "/var/db/repos/${overlay_name}"
+
+# Change ownership to avoid future syncs to run as root
+chown portage:portage "/var/db/repos/${overlay_name}"
+
+# Create overlay configuration folder
+mkdir -p /etc/portage/repos.conf
+
+# Save overlay configuration
+echo "\
+[${overlay_name}]
+location = /var/db/repos/${overlay_name}
+auto-sync = yes
+
+sync-type = git
+sync-uri = ${git_repo}
+
+# The overlay isn't located in the default branch, but in branch \"overlay\".
+sync-git-clone-extra-opts = --branch overlay
+
+# It's optional, but recommended to OpenPGP sign your Git commits.
+sync-git-verify-commit-signature = yes
+sync-openpgp-key-path = /usr/share/openpgp-keys/${overlay_name}.asc" \
+> "/etc/portage/repos.conf/${overlay_name}.conf"
+
+# If you decided in favour of OpenPGP signature verification via Git,
+# save your OpenPGP public key at /usr/share/openpgp-keys/${overlay_name}.asc
+# and execute:
+chown root:root "/usr/share/openpgp-keys/${overlay_name}.asc"
+chmod u=rw,go=r "/usr/share/openpgp-keys/${overlay_name}.asc"
 ```
