@@ -1,6 +1,23 @@
 ---
 github_actions_workflow_settings:
   one_pull_request_per_package: true
+
+# Before the change/deletion of an overlay in this YAML, make sure
+# to first remove _all_ packages that depend on said overlay from this YAML and
+# to run the GitHub Actions workflow to apply the deletion on branch "overlay".
+#
+# Then, you can add the new overlay and the previously deleted packages
+# to this YAML and run the GitHub Actions workflow again
+# to add the packages from the new overlay to branch "overlay".
+#
+# The same applies if you keep overlays unchanged,
+# but want to fetch a package, for example, from "kde" instead of "guru".
+# In that case, delete the package in the YAML, run the workflow,
+# add the package (this time from "kde") to the YAML and run the workflow.
+#
+# This procedure could be avoided, by extending the logic behind
+# git-merge-subpath.sh, but I don't expect for overlay changes
+# to happen often and want to keep the script simple for now.
 overlays:
   guru:
     url: https://github.com/gentoo-mirror/guru.git
@@ -14,6 +31,7 @@ overlays:
   steam-overlay:
     url: https://github.com/anyc/steam-overlay.git
     branch: master
+
 packages:
   app-crypt/clevis: guru
   dev-libs/luksmeta: guru
